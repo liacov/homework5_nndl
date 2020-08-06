@@ -17,7 +17,7 @@ import pickle
 parser = argparse.ArgumentParser(description='Train the agent.')
 
 # Dataset
-parser.add_argument('--softmax', action='store_true', help='Enable softmax over e-greeady')
+parser.add_argument('--softmax', action='store_true', help='Enable softmax over e-greedy')
 parser.add_argument('--sarsa', action='store_true', help='Enable SARSA over Q-learning')
 parser.add_argument('--plot', action='store_true', help='Plot the trajectory')
 parser.add_argument('--holes', action='store_true', help='Activate holes')
@@ -46,14 +46,20 @@ if args.holes and args.spikes:
              [7,3], [6,3], [5,3]]
     spikes = [[7,4], [6,4], [5,4]]
 
+    elements = 'holes&spikes'
+
 elif args.holes:
     holes = [[6,7], [7,6], [7,7], [7,5], [6,5], [5,5], [4,5],
              [7,3], [6,3], [5,3]]
+    elements = 'holes'
 elif args.spikes:
     spikes = [[6,7], [7,6],
               [7,5], [6,5], [5,5], [4,5],
               [7,4], [6,4], [5,4],
               [7,3], [6,3]]
+    elements = 'spikes'
+
+else: elements = 'walls'
 
 discount = 0.9          # exponential discount factor
 softmax = args.softmax         # set to true to use Softmax policy
@@ -64,7 +70,7 @@ alpha = np.ones(episodes) * 0.3
 # linear decay
 #epsilon = np.linspace(0.8, 0.001,episodes)
 # hyperbolic decay
-epsilon = np.linspace(1, 100,episodes)
+epsilon = np.linspace(1, 100, episodes)
 epsilon = 1/epsilon
 
 # initialize the agent
@@ -105,6 +111,11 @@ for index in range(0, episodes):
     reward /= episode_length
     reward_log.append(reward)
 
+    # set labels
+    if softmax: policy = 'softmax'
+    else: policy = 'greedy'
+    if sarsa: algorithm = 'sarsa'
+    else: algorithm = 'q-learning'
 
     # periodically save the agent
     if ((index + 1) % 100 == 0):
@@ -112,7 +123,7 @@ for index in range(0, episodes):
             dill.dump(agent, agent_file)
         print('Episode ', index + 1, ': the agent has obtained an average reward of ', reward, ' starting from position ', initial)
     if ((index  == 1999)) and (PLOT):
-        directory = "plots/plots_{}_{}/{}".format(softmax, sarsa, index + 1)
+        directory = "plots/{}/plots_{}_{}/{}".format(elements, policy, algorithm, index + 1)
         out_dir = Path(directory)
         out_dir.mkdir(parents=True, exist_ok=True)
         plot_world.plot([x,y], goal, obstacles, holes, spikes, trajectory, directory)
