@@ -22,6 +22,7 @@ parser.add_argument('--sarsa', action='store_true', help='Enable SARSA over Q-le
 parser.add_argument('--plot', action='store_true', help='Plot the trajectory')
 parser.add_argument('--holes', action='store_true', help='Activate holes')
 parser.add_argument('--spikes', action='store_true', help='Activate spikes')
+parser.add_argument('--discount', type=float, default=0.9, help='Discount factor')
 
 # Parse input arguments
 args = parser.parse_args()
@@ -61,14 +62,14 @@ elif args.spikes:
 
 else: elements = 'walls'
 
-discount = 0.9          # exponential discount factor
+discount = args.discount          # exponential discount factor
 softmax = args.softmax         # set to true to use Softmax policy
 sarsa = args.sarsa           # set to true to use the Sarsa algorithm
 
-# TODO alpha and epsilon profile
+# alpha and epsilon profile
 alpha = np.ones(episodes) * 0.3
 # linear decay
-#epsilon = np.linspace(0.8, 0.001,episodes)
+# epsilon = np.linspace(0.8, 0.001,episodes)
 # hyperbolic decay
 epsilon = np.linspace(1, 100, episodes)
 epsilon = 1/epsilon
@@ -123,11 +124,11 @@ for index in range(0, episodes):
             dill.dump(agent, agent_file)
         print('Episode ', index + 1, ': the agent has obtained an average reward of ', reward, ' starting from position ', initial)
     if ((index  == 1999)) and (PLOT):
-        directory = "plots/{}/plots_{}_{}/{}".format(elements, policy, algorithm, index + 1)
+        directory = "plots/{}/plots_{}_{}_{}/{}".format(elements, policy, algorithm, discount, index + 1)
         out_dir = Path(directory)
         out_dir.mkdir(parents=True, exist_ok=True)
         plot_world.plot([x,y], goal, obstacles, holes, spikes, trajectory, directory)
 
     # dump reward
-    with open('reward_log_{}_{}.pickle'.format(softmax, sarsa), 'wb') as log:
+    with open('reward_log_{}_{}_{}_{}.pickle'.format(elements, policy, algorithm, discount), 'wb') as log:
             pickle.dump(reward_log, log)
