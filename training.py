@@ -16,29 +16,33 @@ import pickle
 ##############################
 parser = argparse.ArgumentParser(description='Train the agent.')
 
-# Dataset
 parser.add_argument('--softmax', action='store_true', help='Enable softmax over e-greedy')
 parser.add_argument('--sarsa', action='store_true', help='Enable SARSA over Q-learning')
-parser.add_argument('--plot', action='store_true', help='Plot the trajectory')
+parser.add_argument('--no_plot', action='store_true', help='Plot the trajectory')
 parser.add_argument('--holes', action='store_true', help='Activate holes')
 parser.add_argument('--spikes', action='store_true', help='Activate spikes')
-parser.add_argument('--discount', type=float, default=0.9, help='Discount factor')
+parser.add_argument('--discount', type=float, default=0.9, help='Set discount factor (positive real value)')
 
-# Parse input arguments
+# parse input arguments
 args = parser.parse_args()
 
 print(args)
 
-PLOT = args.plot
+# set plot flag
+PLOT = True
+if args.no_plot: PLOT = False
 
-episodes = 2000       # number of training episodes
+episodes = 2000         # number of training episodes
 episode_length = 50     # maximum episode length
 x = 10                  # horizontal size of the box
 y = 10                  # vertical size of the box
 goal = [0, 2]           # objective point
+
+# save walls positions
 obstacles = [[2,0], [2,1], [2,2], [2,3], [2,4], [1,4],
             [0, 6], [1,6], [2,6], [3,6], [4,6], [5,6], [6,6]]
 
+# set additional obstacles, if required
 holes = []
 spikes = []
 
@@ -62,6 +66,7 @@ elif args.spikes:
 
 else: elements = 'walls'
 
+# set hyperparametes
 discount = args.discount          # exponential discount factor
 softmax = args.softmax         # set to true to use Softmax policy
 sarsa = args.sarsa           # set to true to use the Sarsa algorithm
@@ -127,8 +132,10 @@ for index in range(0, episodes):
         directory = "plots/{}/plots_{}_{}_{}/{}".format(elements, policy, algorithm, discount, index + 1)
         out_dir = Path(directory)
         out_dir.mkdir(parents=True, exist_ok=True)
+        # save single frames
         plot_world.plot([x,y], goal, obstacles, holes, spikes, trajectory, directory)
-
+        # save animated gifs
+        plot_world.make_gif(elements, policy, algorithm, discount, index + 1)
     # dump reward
-    with open('reward_log_{}_{}_{}_{}.pickle'.format(elements, policy, algorithm, discount), 'wb') as log:
+    with open('rewards/reward_log_{}_{}_{}_{}.pickle'.format(elements, policy, algorithm, discount), 'wb') as log:
             pickle.dump(reward_log, log)

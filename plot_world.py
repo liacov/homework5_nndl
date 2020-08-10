@@ -1,10 +1,9 @@
+import os
 import imageio
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.colors import ListedColormap
-
-import numpy as np
-
 
 
 """
@@ -15,8 +14,6 @@ Plot a matrix representing the status of the environment
 colors = ["white", "red", "grey", "limegreen", "gold", "palegreen", "orange"]
 # tiles, holes, walls, agent, goal, trajectory
 cmap = ListedColormap(colors)
-
-
 
 
 def plot(size, goal_pos, obstacles, holes, spikes, traj, directory):
@@ -74,3 +71,18 @@ def plot(size, goal_pos, obstacles, holes, spikes, traj, directory):
         fig.tight_layout()
         plt.savefig(directory+"/{}.png".format(i))
         plt.close()
+
+
+def make_gif(elements, policy, algorithm, discount, max_index):
+
+    # images path: string of the form
+    # <elements/plots_policy_algorith_discount/max_index>
+
+    png_dir = f'./plots/{elements}/plots_{policy}_{algorithm}_{discount}/{max_index}'
+    images = []
+    files = sorted(os.listdir(png_dir) ,key=lambda x: int(os.path.splitext(x)[0]))
+    for file_name in files:
+        if file_name.endswith('.png'):
+            file_path = os.path.join(png_dir, file_name)
+            images.append(imageio.imread(file_path))
+    imageio.mimsave( f'GIFS/{elements}_{policy}_{algorithm}_{discount}_{max_index}.gif' , images, fps=2)
