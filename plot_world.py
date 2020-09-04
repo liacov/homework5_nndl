@@ -73,16 +73,16 @@ def plot(size, goal_pos, obstacles, holes, spikes, traj, directory):
         plt.close()
 
 
-def make_gif(elements, policy, algorithm, discount, max_index):
+def make_gif(elements, policy, algorithm, discount, lr, max_index):
 
     # images path: string of the form
     # <elements/plots_policy_algorith_discount/max_index>
 
-    png_dir = f'./plots/{elements}/plots_{policy}_{algorithm}_{discount}/{max_index}'
+    png_dir = f'./plots/{elements}/plots_{policy}_{algorithm}_{discount}_{lr}/{max_index}'
     images = []
     files = sorted(os.listdir(png_dir) ,key=lambda x: int(os.path.splitext(x)[0]))
     for file_name in files:
         if file_name.endswith('.png'):
             file_path = os.path.join(png_dir, file_name)
             images.append(imageio.imread(file_path))
-    imageio.mimsave( f'GIFS/{elements}_{policy}_{algorithm}_{discount}_{max_index}.gif' , images, fps=2)
+    imageio.mimsave( f'GIFS/{elements}_{policy}_{algorithm}_{discount}_{lr}_{max_index}.gif' , images, fps=2)

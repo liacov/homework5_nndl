@@ -28,11 +28,14 @@ args = parser.parse_args()
 
 print(args)
 
+#set seed
+np.random.seed(42)
+
 # set plot flag
 PLOT = True
 if args.no_plot: PLOT = False
 
-episodes = 2000         # number of training episodes
+episodes = 4000         # number of training episodes
 episode_length = 50     # maximum episode length
 x = 10                  # horizontal size of the box
 y = 10                  # vertical size of the box
@@ -72,7 +75,8 @@ softmax = args.softmax         # set to true to use Softmax policy
 sarsa = args.sarsa           # set to true to use the Sarsa algorithm
 
 # alpha and epsilon profile
-alpha = np.ones(episodes) * 0.3
+lr = 0.5
+alpha = np.ones(episodes) * lr
 # linear decay
 # epsilon = np.linspace(0.8, 0.001,episodes)
 # hyperbolic decay
@@ -128,14 +132,14 @@ for index in range(0, episodes):
         with open('agent.obj', 'wb') as agent_file:
             dill.dump(agent, agent_file)
         print('Episode ', index + 1, ': the agent has obtained an average reward of ', reward, ' starting from position ', initial)
-    if ((index  == 1999)) and (PLOT):
-        directory = "plots/{}/plots_{}_{}_{}/{}".format(elements, policy, algorithm, discount, index + 1)
+    if ((index  == episodes - 1)) and (PLOT):
+        directory = "plots/{}/plots_{}_{}_{}_{}/{}".format(elements, policy, algorithm, discount, lr, index + 1)
         out_dir = Path(directory)
         out_dir.mkdir(parents=True, exist_ok=True)
         # save single frames
         plot_world.plot([x,y], goal, obstacles, holes, spikes, trajectory, directory)
         # save animated gifs
-        plot_world.make_gif(elements, policy, algorithm, discount, index + 1)
-    # dump reward
-    with open('rewards/reward_log_{}_{}_{}_{}.pickle'.format(elements, policy, algorithm, discount), 'wb') as log:
-            pickle.dump(reward_log, log)
+        plot_world.make_gif(elements, policy, algorithm, discount, lr, index + 1)
+    # dump reward at each episode
+    with open('rewards/reward_log_{}_{}_{}_{}_{}.pickle'.format(elements, policy, algorithm, discount, lr), 'wb') as log:
+                pickle.dump(reward_log, log)
